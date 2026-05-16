@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Privacy Policy — Letterboxd Logger</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0d;
+      --surface: #161616;
+      --border: #2a2a2a;
+      --text: #f0ece4;
+      --muted: #7a756e;
+      --dim: #4a4640;
+      --accent: #e8b84b;
+      --orange: #ff8000;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 15px;
+      line-height: 1.75;
+      min-height: 100vh;
+    }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 24px 0;
+    }
+
+    .container {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+
+    .logo-dot {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--orange);
+      flex-shrink: 0;
+    }
+
+    .logo-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 16px;
+      color: var(--text);
+    }
+
+    main {
+      padding: 56px 0 80px;
+    }
+
+    .eyebrow {
+      font-size: 11px;
+      font-weight: 500;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--accent);
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-family: 'DM Serif Display', serif;
+      font-size: 36px;
+      color: var(--text);
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .updated {
+      font-size: 13px;
+      color: var(--dim);
+      margin-bottom: 48px;
+    }
+
+    h2 {
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin: 40px 0 12px;
+    }
+
+    p {
+      color: var(--muted);
+      margin-bottom: 16px;
+    }
+
+    ul {
+      list-style: none;
+      margin-bottom: 16px;
+    }
+
+    ul li {
+      color: var(--muted);
+      padding: 6px 0 6px 20px;
+      position: relative;
+    }
+
+    ul li::before {
+      content: '—';
+      position: absolute;
+      left: 0;
+      color: var(--dim);
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 24px;
+      margin: 32px 0;
+    }
+
+    .card p {
+      margin: 0;
+      font-size: 14px;
+    }
+
+    strong { color: var(--text); font-weight: 500; }
+
+    a { color: var(--accent); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 24px 0;
+    }
+
+    footer p {
+      font-size: 13px;
+      margin: 0;
+      color: var(--dim);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="container">
+      <a class="logo" href="#">
+        <div class="logo-dot"></div>
+        <span class="logo-name">Letterboxd Logger</span>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <div class="container">
+      <div class="eyebrow">Legal</div>
+      <h1>Privacy Policy</h1>
+      <p class="updated">Last updated: May 2026</p>
+
+      <div class="card">
+        <p><strong>Short version:</strong> Letterboxd Logger does not collect, store, or transmit any personal data. Everything stays on your device and between your browser and Letterboxd.</p>
+      </div>
+
+      <h2>What this extension does</h2>
+      <p>Letterboxd Logger is a Chrome extension that detects the movie you are watching on Netflix, MUBI, Prime Video, or JioHotstar and lets you log it to your Letterboxd account without leaving your browser.</p>
+
+      <h2>Data we access</h2>
+      <ul>
+        <li><strong>Movie title</strong> — read from the active tab's page title or DOM. Used only to search Letterboxd for the matching film. Never stored or sent anywhere except Letterboxd.</li>
+        <li><strong>Letterboxd session cookie</strong> (<code>com.xk72.webparts.csrf</code>) — read locally to authenticate API requests to Letterboxd on your behalf. Never transmitted to any server other than letterboxd.com.</li>
+        <li><strong>Your rating, review, and diary preferences</strong> — entered by you in the popup. Sent directly to Letterboxd's API. Never stored by this extension.</li>
+      </ul>
+
+      <h2>Data we do not collect</h2>
+      <ul>
+        <li>We do not collect analytics or usage data</li>
+        <li>We do not track which movies you watch or log</li>
+        <li>We do not store any data on remote servers — there are none</li>
+        <li>We do not share any information with third parties</li>
+        <li>We do not access your browsing history</li>
+        <li>We do not read cookies from any domain other than letterboxd.com</li>
+      </ul>
+
+      <h2>Permissions explained</h2>
+      <ul>
+        <li><strong>activeTab</strong> — to read the title of the movie page you are currently on</li>
+        <li><strong>scripting</strong> — to inject a small script that reads the movie title from the streaming page</li>
+        <li><strong>cookies</strong> — to read the Letterboxd CSRF token required to make authenticated API requests</li>
+        <li><strong>Host permissions for Netflix, MUBI, Prime Video, JioHotstar, and Letterboxd</strong> — required to detect titles and communicate with Letterboxd's API</li>
+      </ul>
+
+      <h2>Third-party services</h2>
+      <p>This extension communicates only with <strong>letterboxd.com</strong> on your behalf, using your existing logged-in session. It does not use any analytics services, ad networks, or other third-party services.</p>
+
+      <h2>Changes to this policy</h2>
+      <p>If this policy changes, the updated version will be posted here with a new date. Significant changes will also be noted in the extension's Chrome Web Store listing.</p>
+
+      <h2>Contact</h2>
+      <p>If you have questions about this privacy policy or the extension's behaviour, please open an issue on the <a href="#">GitHub repository</a>.</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>Letterboxd Logger is an independent project and is not affiliated with Letterboxd, Netflix, MUBI, Amazon, or Star/Disney.</p>
+    </div>
+  </footer>
+
+</body>
+</html>

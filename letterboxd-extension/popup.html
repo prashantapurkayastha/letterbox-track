@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Letterboxd Logger</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0d;
+      --surface: #161616;
+      --surface2: #1f1f1f;
+      --border: #2a2a2a;
+      --border-bright: #3a3a3a;
+      --text: #f0ece4;
+      --text-muted: #7a756e;
+      --text-dim: #4a4640;
+      --accent: #e8b84b;
+      --accent-dim: #3d2f0e;
+      --green: #4caf6f;
+      --green-dim: #0e2918;
+      --red: #e05c5c;
+      --lbd-orange: #ff8000;
+    }
+
+    body {
+      width: 340px;
+      min-height: 200px;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      line-height: 1.5;
+      overflow: hidden;
+    }
+
+    /* ── Header ── */
+    .header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .logo-icon {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--lbd-orange);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .logo-icon svg { display: block; }
+    .logo-name {
+      font-family: 'DM Serif Display', serif;
+      font-size: 14px;
+      color: var(--text);
+      letter-spacing: 0.01em;
+    }
+    .platform-badge {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 2px 7px;
+    }
+
+    /* ── States ── */
+    #state-detecting, #state-error, #state-confirm, #state-logging, #state-done {
+      display: none;
+    }
+    #state-detecting.active,
+    #state-error.active,
+    #state-confirm.active,
+    #state-logging.active,
+    #state-done.active {
+      display: block;
+    }
+
+    /* ── Detecting ── */
+    .detecting-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 32px 20px;
+      gap: 12px;
+    }
+    .spinner {
+      width: 28px;
+      height: 28px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .detecting-label {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    /* ── Error ── */
+    .error-wrap {
+      padding: 20px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .error-icon {
+      font-size: 22px;
+      line-height: 1;
+    }
+    .error-title {
+      font-weight: 500;
+      color: var(--red);
+      font-size: 13px;
+    }
+    .error-msg {
+      color: var(--text-muted);
+      font-size: 12px;
+      line-height: 1.6;
+    }
+
+    /* ── Film card ── */
+    .film-card {
+      padding: 14px 16px 0;
+    }
+    .film-meta {
+      display: flex;
+      align-items: baseline;
+      gap: 6px;
+      margin-bottom: 2px;
+    }
+    .film-platform {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--lbd-orange);
+    }
+    .film-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 20px;
+      line-height: 1.25;
+      color: var(--text);
+      letter-spacing: 0.01em;
+    }
+    .film-title em {
+      font-style: italic;
+      color: var(--text-muted);
+    }
+    .film-year {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+    .wrong-film {
+      display: inline-block;
+      font-size: 11px;
+      color: var(--text-dim);
+      cursor: pointer;
+      margin-top: 2px;
+      border-bottom: 1px dashed var(--text-dim);
+      transition: color 0.15s;
+    }
+    .wrong-film:hover { color: var(--text-muted); }
+
+    /* ── Divider ── */
+    .divider {
+      height: 1px;
+      background: var(--border);
+      margin: 14px 16px;
+    }
+
+    /* ── Rating ── */
+    .section-label {
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 0 16px;
+      margin-bottom: 8px;
+    }
+    .stars-wrap {
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      padding: 0 16px;
+      margin-bottom: 4px;
+    }
+    .star {
+      font-size: 22px;
+      cursor: pointer;
+      color: var(--border-bright);
+      transition: color 0.1s, transform 0.1s;
+      user-select: none;
+      line-height: 1;
+    }
+    .star:hover, .star.active { color: var(--accent); }
+    .star.half-star { font-size: 18px; margin-top: 2px; }
+    .star:hover { transform: scale(1.15); }
+    .rating-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      padding: 0 16px;
+      margin-bottom: 14px;
+      min-height: 16px;
+      font-style: italic;
+    }
+
+    /* ── Review ── */
+    .review-wrap {
+      padding: 0 16px;
+      margin-bottom: 14px;
+    }
+    .review-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      line-height: 1.6;
+      padding: 10px 12px;
+      resize: none;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+    .review-input:focus { border-color: var(--border-bright); }
+    .review-input::placeholder { color: var(--text-dim); }
+
+    /* ── Toggles ── */
+    .toggles {
+      padding: 0 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 14px;
+    }
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+    }
+    .toggle-label {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+    }
+    .toggle-label svg { opacity: 0.5; }
+    .toggle {
+      width: 32px;
+      height: 18px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      position: relative;
+      transition: background 0.2s, border-color 0.2s;
+      flex-shrink: 0;
+    }
+    .toggle.on {
+      background: var(--accent-dim);
+      border-color: var(--accent);
+    }
+    .toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--text-dim);
+      transition: transform 0.2s, background 0.2s;
+    }
+    .toggle.on::after {
+      transform: translateX(14px);
+      background: var(--accent);
+    }
+
+    /* ── Actions ── */
+    .actions {
+      padding: 0 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .btn {
+      width: 100%;
+      padding: 10px 16px;
+      border-radius: 8px;
+      font-family: 'DM Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      border: none;
+      transition: opacity 0.15s, transform 0.1s;
+      text-align: center;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-primary {
+      background: var(--accent);
+      color: #0d0d0d;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-secondary {
+      background: transparent;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+    .btn-secondary:hover {
+      border-color: var(--border-bright);
+      color: var(--text);
+    }
+
+    /* ── Logging ── */
+    .logging-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 32px 20px;
+      gap: 12px;
+    }
+    .logging-label {
+      color: var(--text-muted);
+      font-size: 12px;
+    }
+
+    /* ── Done ── */
+    .done-wrap {
+      padding: 24px 16px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+      text-align: center;
+    }
+    .done-check {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: var(--green-dim);
+      border: 1px solid var(--green);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--green);
+      font-size: 18px;
+    }
+    .done-title {
+      font-family: 'DM Serif Display', serif;
+      font-size: 16px;
+      color: var(--text);
+    }
+    .done-sub {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+    .done-link {
+      font-size: 11px;
+      color: var(--accent);
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    /* ── Wrong film override ── */
+    .manual-wrap {
+      padding: 0 16px;
+      margin-bottom: 14px;
+      display: none;
+    }
+    .manual-wrap.show { display: block; }
+    .manual-input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--accent-dim);
+      border-radius: 8px;
+      color: var(--text);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 12px;
+      padding: 8px 12px;
+      outline: none;
+    }
+    .manual-input:focus { border-color: var(--accent); }
+  </style>
+</head>
+<body>
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+          <circle cx="6" cy="6" r="4" fill="white" opacity="0.9"/>
+        </svg>
+      </div>
+      <span class="logo-name">Letterboxd Logger</span>
+    </div>
+    <div class="platform-badge" id="platform-badge">Netflix</div>
+  </div>
+
+  <!-- State: Detecting -->
+  <div id="state-detecting" class="active">
+    <div class="detecting-wrap">
+      <div class="spinner"></div>
+      <span class="detecting-label">Detecting movie…</span>
+    </div>
+  </div>
+
+  <!-- State: Error -->
+  <div id="state-error">
+    <div class="error-wrap">
+      <div class="error-icon">⚠</div>
+      <div class="error-title">Couldn't detect a movie</div>
+      <div class="error-msg" id="error-message">
+        Make sure you're on a Netflix watch page with a movie playing.
+      </div>
+    </div>
+  </div>
+
+  <!-- State: Confirm & Log -->
+  <div id="state-confirm">
+    <!-- Film info -->
+    <div class="film-card">
+      <div class="film-meta">
+        <span class="film-platform" id="film-platform">Netflix</span>
+      </div>
+      <div class="film-title" id="film-title">—</div>
+      <div class="film-year" id="film-year"></div>
+      <span class="wrong-film" id="wrong-film-btn">Wrong film?</span>
+    </div>
+
+    <!-- Manual override input -->
+    <div class="manual-wrap" id="manual-wrap">
+      <input class="manual-input" id="manual-input" type="text" placeholder="Enter correct movie title…" />
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Star rating -->
+    <div class="section-label">Your rating</div>
+    <div class="stars-wrap" id="stars-wrap">
+      <!-- Stars injected by JS -->
+    </div>
+    <div class="rating-label" id="rating-label">Tap to rate</div>
+
+    <!-- Review -->
+    <div class="section-label">Quick review</div>
+    <div class="review-wrap">
+      <textarea class="review-input" id="review-input" rows="3" placeholder="What did you think?…"></textarea>
+    </div>
+
+    <!-- Toggles -->
+    <div class="toggles">
+      <label class="toggle-row" id="toggle-watched">
+        <span class="toggle-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          Watched today
+        </span>
+        <div class="toggle on" id="toggle-watched-el"></div>
+      </label>
+      <label class="toggle-row" id="toggle-like">
+        <span class="toggle-label">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+          Like this film
+        </span>
+        <div class="toggle" id="toggle-like-el"></div>
+      </label>
+    </div>
+
+    <!-- Actions -->
+    <div class="actions">
+      <button class="btn btn-primary" id="btn-log">Log to Letterboxd</button>
+      <button class="btn btn-secondary" id="btn-open">Open on Letterboxd ↗</button>
+    </div>
+  </div>
+
+  <!-- State: Logging -->
+  <div id="state-logging">
+    <div class="logging-wrap">
+      <div class="spinner"></div>
+      <span class="logging-label">Saving to Letterboxd…</span>
+    </div>
+  </div>
+
+  <!-- State: Done -->
+  <div id="state-done">
+    <div class="done-wrap">
+      <div class="done-check">✓</div>
+      <div class="done-title" id="done-title">Logged!</div>
+      <div class="done-sub" id="done-sub">Added to your diary</div>
+      <span class="done-link" id="done-link">View on Letterboxd ↗</span>
+    </div>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
